@@ -13,14 +13,20 @@ import Button from '@mui/material/Button';
 import PersonsWeek from './PersonsWeek'
 import templateFeedData from './templateFeedData.csv';
 import feeddataITSCExample from './feeddataITSCExample.csv';
+import getMultipleSheetsAsExcel from 'ag-grid-react';
+import TeamsSheetMaker from './teamsSheetMaker'
 
 function RosterHelper() {
   let teamsCSV = [
     ["Member","Work Email","Group","Shift Start Date","Shift Start Time","Shift End Date","Shift End Time","Theme Color","Custom Label","Unpaid Break (minutes)","Notes","Shared"]
   ]
 
+  // let humanityCSV = [
+  //   ["Employee Names","Position","Location","Start Date","End Date","Start Time","End Time","Paid Breaks","Unpaid Breaks","Open Slots","Remote Location","Required Skills","Tags","Title","Note"]
+  // ]
+
   let humanityCSV = [
-    ["Employee Names","Position","Location","Start Date","End Date","Start Time","End Time","Paid Breaks","Unpaid Breaks","Open Slots","Remote Location","Required Skills","Tags","Title","Note"]
+    ["Names","Location","Position","Start Date","End Date","Start Time","End Time","Notes","Title","Open","Remote sites","Unpaid Breaks"]
   ]
 
   let defaultFeed = "{Staff}\n{Group name in teams}\n{Shifts}"
@@ -226,6 +232,9 @@ function RosterHelper() {
             )
           }
         })()}
+
+
+        <TeamsSheetMaker></TeamsSheetMaker>
       </header>
     </div>
   );
