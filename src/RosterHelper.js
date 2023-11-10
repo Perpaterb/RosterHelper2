@@ -34,7 +34,7 @@ function RosterHelper() {
   const [staff, setStaff] = useState([]);
   const [shifts, setShifts] = useState([]);
   const [group, setGroup] = useState([]);
-  const [monday, setMonday] = useState(dayjs());
+  const [monday, setMonday] = useState(dayjs().day(1));
   const [teamsData, setTeamsData] = useState(teamsCSV);
   
 
@@ -143,6 +143,11 @@ function RosterHelper() {
 
   let helpNote = 'Feed Data: {Staff}\n{Group name in teams}\n{Shifts} CSV format in excel copy from a notepad to this page'
 
+  const isNotMonday = (date) => {
+    const day = date.day();
+      return day === 0 || day === 2 || day === 3 || day === 4 || day === 5 || day === 6;
+  };
+
   return (
     <div className="App">
       <header className="App-header">
@@ -187,16 +192,12 @@ function RosterHelper() {
             return (
               <Box>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DemoContainer
-                    components={[
-                      'DatePicker',
-                    ]}
-                  >
-                    <p>Monday of the roster week :</p>
-                    <DemoItem>
-                      <DatePicker defaultValue={dayjs()} format="DD-MM-YYYY" onChange={(newValue) => setMonday(newValue)}/>
-                    </DemoItem>
-                  </DemoContainer>
+                        <p>Monday of the roster week :</p>
+                          <DatePicker defaultValue={dayjs().day(1)} format="DD-MM-YYYY" onChange={(newValue) => setMonday(newValue)} shouldDisableDate={isNotMonday}
+                            sx={{
+                              width: 400,
+                            }}
+                          />  
                 </LocalizationProvider>
                 
                 {staff.map((name, i) => (
