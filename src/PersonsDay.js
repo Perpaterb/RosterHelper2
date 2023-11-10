@@ -10,8 +10,7 @@ import FormControl from '@mui/material/FormControl';
 
 // ["Member","Work Email","Group","Shift Start Date","Shift Start Time","Shift End Date","Shift End Time","Theme Color","Custom Label","Unpaid Break (minutes)","Notes","Shared"],
 
-// ["Employee Names","Position","Location","Start Date","End Date","Start Time","End Time","Paid Breaks","Unpaid Breaks","Open Slots","Remote Location","Required Skills","Tags","Title","Note"]
-// name	location	position	start date	end date	start time	finish time	notes	title	open	remote site
+// ["Names","Location","Position","Start Date","End Date","Start Time","End Time","Notes","Title","Open","Remote sites"]
 function timeAddMinutes(time, min) {
   var t = time.split(":"),      // convert to array [hh, mm, ss]
       h = Number(t[0]),         // get hours
@@ -44,6 +43,26 @@ function getTimeAsNeededForHumanity(time) {
   return time
 }
 
+function createShiftInHumanity(monday,staff,event,index,shiftStartTime,shiftEndTime) {
+
+  let tempArray = []
+
+  tempArray = [staff[0]]
+  tempArray.push(event.value[5])
+  tempArray.push(staff[2])
+  tempArray.push(monday.add(index, 'day').format('DD-MM-YYYY'))
+  tempArray.push(monday.add(index, 'day').format('DD-MM-YYYY'))
+  tempArray.push(shiftStartTime)
+  tempArray.push(shiftEndTime)
+  tempArray.push(event.value[0] + " Lunch from " + getTimeAsNeededForHumanity(event.value[3]))
+  tempArray.push('')
+  tempArray.push('')
+  tempArray.push('')
+  return (tempArray)
+}
+
+
+
 function PersonsDay({index, dayName, shifts, staff, monday, group}) {
 
 
@@ -52,15 +71,6 @@ function PersonsDay({index, dayName, shifts, staff, monday, group}) {
     shiftsOptions.push({ value: shifts[i], label: shifts[i][0] + " L:" + shifts[i][3]})
   }
 
-
-  //console.log(shiftsOptions)
-  //console.log(shiftsArray)
-
-  // console.log("index", index)
-  // console.log("dayName", dayName)
-  // console.log("shiftNames", shiftNames)
-  // console.log("shiftStartTimes", shiftStartTimes)
-  // console.log("shiftBreakStartTimes", shiftBreakStartTimes)
   const [selected, setSelected] = useState([]);
 
   useEffect(() => { 
@@ -145,61 +155,54 @@ function PersonsDay({index, dayName, shifts, staff, monday, group}) {
     // humanityCsv#######
     humanityCsv = JSON.parse(localStorage.getItem('humanityCSV'))
     //humanityCsv = []
-  
-    tempArray = [staff[0]]
-    tempArray.push(event.value[5])
-    tempArray.push(staff[2])
-    tempArray.push(monday.add(index, 'day').format('DD-MM-YYYY'))
-    tempArray.push(monday.add(index, 'day').format('DD-MM-YYYY'))
-    // startTime = event.value[2].slice(0, 2) + ":" + event.value[2].slice(2)
-
-    tempArray.push(getTimeAsNeededForHumanity(event.value[2]))
-
-    let endTime = (timeAddMinutes((event.value[2].slice(0, 2) + ":" + event.value[2].slice(2)), (8*60)))
-    // console.log("endTime", endTime)
-    tempArray.push(getTimeAsNeededForHumanity(endTime))
-    // tempArray.push('') // "Paid Breaks","Unpaid Breaks"
-    
-    tempArray.push(event.value[0] + " Lunch from " + getTimeAsNeededForHumanity(event.value[3]))
-
- 
-    tempArray.push(event.value[0])
-    tempArray.push('')
-    tempArray.push('')
-    // console.log("event.value[0]", event.value[0])
-    if(event.value[0] != "none"){
-      if (event.value[0] === "Off" | event.value[0] === "Sick" | event.value[0] === "Leave" | event.value[0] === "RDS") {
-        tempArray.push("09:00am - 05:00pm")
-      }else {
-        let breakStart = getTimeAsNeededForHumanity(event.value[3])
-        let breakEnd = (timeAddMinutes((event.value[3].slice(0, 2) + ":" + event.value[3].slice(2)), (60)))
-        // console.log("breakEnd", breakEnd)
-        breakEnd = getTimeAsNeededForHumanity(breakEnd)
-        tempArray.push(breakStart + ' - ' + breakEnd)
+    let humenityArray =[]
+    let toBeRemoved = []
+    if (event.value[3] === '0000'){ //creating one shif
+      humenityArray = createShiftInHumanity(monday,staff,event,index,'09:00am','05:00pm') // (monday,staff,Shift.value,index,startTime(0000), endTime(0000))
+      
+      for (let i = 0; i < humanityCsv.length; i++) { // remove all others on the same data
+        if (humanityCsv[i][0] ===  humenityArray[0] && humanityCsv[i][3] === humenityArray[3]) {
+          toBeRemoved.push(i)
+        }
       }
-    }
-    // tempArray.push('')
-    // tempArray.push('')
-    // tempArray.push('')
 
-    //console.log("tempArray", tempArray)
+      humanityCsv.push(humenityArray) // add to overall array
 
-    double = 0
-    for (let i = 0; i < humanityCsv.length; i++) {
-      if (humanityCsv[i][0] ===  tempArray[0] & humanityCsv[i][3] === tempArray[3]) {
-        double = 1
-        humanityCsv[i] = tempArray
-        break
+    } else {  // creating 2 shifts 
+
+      for (let i = 0; i < humanityCsv.length; i++) { // remove all others on the same data
+        if (humanityCsv[i][0] ===  staff[0] && humanityCsv[i][3] === (monday.add(index, 'day').format('DD-MM-YYYY'))) {
+          toBeRemoved.push(i)
+        }
       }
-    }
-    if (double === 0) {
-      humanityCsv.push(tempArray)
-    }
+      
+      humenityArray = createShiftInHumanity(
+        monday,
+        staff,
+        event,
+        index,
+        getTimeAsNeededForHumanity(event.value[2].slice(0, 2) + ":" + event.value[2].slice(2)),
+        getTimeAsNeededForHumanity(event.value[3].slice(0, 2) + ":" + event.value[3].slice(2))
+      )
 
-    localStorage.setItem('humanityCSV', JSON.stringify(humanityCsv))
+      humanityCsv.push(humenityArray) // add to overall array
+
+      humenityArray = createShiftInHumanity(
+        monday,
+        staff,
+        event,
+        index,
+        getTimeAsNeededForHumanity(timeAddMinutes((event.value[3].slice(0, 2) + ":" + event.value[3].slice(2)), (60))),
+        getTimeAsNeededForHumanity(timeAddMinutes((event.value[2].slice(0, 2) + ":" + event.value[2].slice(2)), (8*60)))
+      )
+      humanityCsv.push(humenityArray) // add to overall array
+    }
+    let humanityCsv2 = JSON.parse(JSON.stringify(humanityCsv))
+    for (let i = toBeRemoved.length-1; i >=0; i--) {
+      humanityCsv2.splice(toBeRemoved[i],1)
+    }
+    localStorage.setItem('humanityCSV', JSON.stringify(humanityCsv2))
   }
-
-
 
   return (
     <Box key={"personsday" + dayName + index}
