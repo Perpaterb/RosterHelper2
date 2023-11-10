@@ -26,7 +26,7 @@ function RosterHelper() {
   // ]
 
   let humanityCSV = [
-    ["Names","Location","Position","Start Date","End Date","Start Time","End Time","Notes","Title","Open","Remote sites","Unpaid Breaks"]
+    ["Names","Location","Position","Start Date","End Date","Start Time","End Time","Notes","Title","Open","Remote sites"]
   ]
 
   let defaultFeed = "{Staff}\n{Group name in teams}\n{Shifts}"
