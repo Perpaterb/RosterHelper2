@@ -105,12 +105,12 @@ function RosterHelper() {
         
         
         tempArray[i] = feedtemp.split("}")[3].split("{")[0].split("[")[i].split("]")[0].split("|").reduce((acc, i) => i ? [...acc, i] : acc, [])
-        tempArray[i][4] = tempArray[i][4].slice(0, -1)
+        tempArray[i][4] = tempArray[i][4]
         
       }
       tempArray.splice(0,1,['none','', '', '', '', ''])
 
-      // console.log("Shifts",tempArray)
+      console.log("Shifts",tempArray)
       setShifts(tempArray)
     }
 
@@ -210,17 +210,7 @@ function RosterHelper() {
                     group={group}
                     />
                 ))}
-        
-                {/* <CSVLink data={getTeamsCSVFile()} filename={downloadName}> Export Teams Roster </CSVLink> */}
-                <CSVLink data={teamsData} asyncOnClick={true} filename={teamsDownloadName}
-                  onClick={(event, done) => {setTeamsData(JSON.parse(localStorage.getItem('teamsCSV'))); done(); }}  
-                > Export Teams Roster </CSVLink>
-                <Box
-                    sx={{
-                      height: 30,
-                    }}
-                  ></Box>
-                
+                      
                 <CSVLink data={humanityData} asyncOnClick={true} filename={humanityDownloadName}
                   onClick={(event, done) => {setHumanityData(JSON.parse(localStorage.getItem('humanityCSV'))); done(); }}  
                 > Export Humanity Roster </CSVLink>
@@ -229,13 +219,11 @@ function RosterHelper() {
                       height: 30,
                     }}
                   ></Box>
+                  <TeamsSheetMaker></TeamsSheetMaker>
               </Box>
             )
           }
         })()}
-
-
-        <TeamsSheetMaker></TeamsSheetMaker>
       </header>
     </div>
   );

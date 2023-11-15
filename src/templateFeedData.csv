@@ -1,3 +1,3 @@
 {Staff},[name|email|position],[Andrew Strange|andrew.strange@uts.edu.au|Senior Customer Support Officer]
 {Group name in teams},[ITSC]
-{Shifts},[Name|Teams Theme colour|Start time|Lunch start time|teams Note|humanity position],[9am UTS|5. Pink|0900|1330|Lunch 1:30pm|11. Onsite - ITSC]
+{Shifts},[Name|Teams Theme colour|Start time|Lunch start time(if 0000 then no lunch)|teams Note|humanity position],[9am UTS|5. Pink|0900|1330|Lunch 1:30pm|11. Onsite - ITSC]

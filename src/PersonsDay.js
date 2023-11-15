@@ -158,7 +158,14 @@ function PersonsDay({index, dayName, shifts, staff, monday, group}) {
     let humenityArray =[]
     let toBeRemoved = []
     if (event.value[3] === '0000'){ //creating one shif
-      humenityArray = createShiftInHumanity(monday,staff,event,index,'09:00am','05:00pm') // (monday,staff,Shift.value,index,startTime(0000), endTime(0000))
+      humenityArray = createShiftInHumanity(
+        monday,
+        staff,
+        event,
+        index,
+        getTimeAsNeededForHumanity(event.value[2].slice(0, 2) + ":" + event.value[2].slice(2)),
+        getTimeAsNeededForHumanity(timeAddMinutes((event.value[2].slice(0, 2) + ":" + event.value[2].slice(2)), (8*60)))
+      ) // (monday,staff,Shift.value,index,startTime(0000), endTime(0000))
       
       for (let i = 0; i < humanityCsv.length; i++) { // remove all others on the same data
         if (humanityCsv[i][0] ===  humenityArray[0] && humanityCsv[i][3] === humenityArray[3]) {
