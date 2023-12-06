@@ -83,7 +83,7 @@ function TeamsSheetMaker() {
           spreadsheets.push(
             shiftsGridRef.current.api.getSheetDataForExcel({ sheetName: 'Shifts' }),
           );
-          console.log("spreadsheets". spreadsheets)
+          //console.log("spreadsheets". spreadsheets)
           exportMultipleSheetsAsExcel({
               data: spreadsheets,
               fileName: "MS Teams Shifts Export " + moment().format('MMMM Do YYYY, h:mm:ss a') + ".xlsx",

@@ -21,10 +21,6 @@ function RosterHelper() {
     ["Member","Work Email","Group","Shift Start Date","Shift Start Time","Shift End Date","Shift End Time","Theme Color","Custom Label","Unpaid Break (minutes)","Notes","Shared"]
   ]
 
-  // let humanityCSV = [
-  //   ["Employee Names","Position","Location","Start Date","End Date","Start Time","End Time","Paid Breaks","Unpaid Breaks","Open Slots","Remote Location","Required Skills","Tags","Title","Note"]
-  // ]
-
   let humanityCSV = [
     ["Names","Location","Position","Start Date","End Date","Start Time","End Time","Notes","Title","Open","Remote sites"]
   ]
@@ -43,16 +39,16 @@ function RosterHelper() {
 
   const [errorInFeed, setErroInFeed] = useState(false);
 
-  try {
-    localStorage.setItem('humanityCSV', JSON.stringify(humanityCSV))
-  } catch (error) {
-    console.error(error.message); //raises the error
-  }
-  try {
-    localStorage.setItem('teamsCSV', JSON.stringify(teamsCSV))
-  } catch (error) {
-    console.error(error.message); //raises the error
-  }
+  // try {
+  //   localStorage.setItem('humanityCSV', JSON.stringify(humanityCSV))
+  // } catch (error) {
+  //   console.error(error.message); //raises the error
+  // }
+  // try {
+  //   localStorage.setItem('teamsCSV', JSON.stringify(teamsCSV))
+  // } catch (error) {
+  //   console.error(error.message); //raises the error
+  // }
 
   useEffect(() => { 
     if (localStorage.getItem('FeedData') === undefined || localStorage.getItem('FeedData') === null || localStorage.getItem('FeedData') === 'undefined') {
@@ -66,7 +62,21 @@ function RosterHelper() {
   },[]);
 
 
+  function updateHumanityDataForExport(humData) {
+    
 
+    let humExport = humanityCSV
+    for (let i = 1; i < humData.length; i++) {
+      //console.log("humData[i][3]", humData[i][3])
+      //console.log("monday", monday.format('DD-MM-YYYY'))
+      if(humData[i][3] === monday.format('DD-MM-YYYY') || humData[i][3] === monday.add(1, 'day').format('DD-MM-YYYY') || humData[i][3] === monday.add(2, 'day').format('DD-MM-YYYY') || humData[i][3] === monday.add(3, 'day').format('DD-MM-YYYY') || humData[i][3] === monday.add(4, 'day').format('DD-MM-YYYY') || humData[i][3] === monday.add(5, 'day').format('DD-MM-YYYY') || humData[i][3] === monday.add(6, 'day').format('DD-MM-YYYY')){
+        humExport.push(humData[i])
+      }
+
+    }
+
+    setHumanityData(humExport)
+  }
 
   function updateTable() {
     let errorcheck = false
@@ -110,7 +120,7 @@ function RosterHelper() {
       }
       tempArray.splice(0,1,['none','', '', '', '', ''])
 
-      console.log("Shifts",tempArray)
+      //console.log("Shifts",tempArray)
       setShifts(tempArray)
     }
 
@@ -212,7 +222,7 @@ function RosterHelper() {
                 ))}
                       
                 <CSVLink data={humanityData} asyncOnClick={true} filename={humanityDownloadName}
-                  onClick={(event, done) => {setHumanityData(JSON.parse(localStorage.getItem('humanityCSV'))); done(); }}  
+                  onClick={(event, done) => {updateHumanityDataForExport(JSON.parse(localStorage.getItem('humanityCSV'))); done(); }}  
                 > Export Humanity Roster </CSVLink>
                 <Box
                     sx={{
