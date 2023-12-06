@@ -32,6 +32,7 @@ function PersonsWeek({index, staff, shifts, monday, group}) {
             border: 1,
             padding: 1,
             margin:1,
+            backgroundColor: 'rgba(125,220,255,0.3)',
         }}
     >
         <Box
