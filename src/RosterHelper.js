@@ -301,7 +301,11 @@ function RosterHelper() {
                       height: 30,
                     }}
                   ></Box>
-                  <TeamsSheetMaker></TeamsSheetMaker>
+                  <TeamsSheetMaker 
+                    group={group}
+                    staff={staff}
+                    monday={monday}
+                  ></TeamsSheetMaker>
               </Box>
             )
           }

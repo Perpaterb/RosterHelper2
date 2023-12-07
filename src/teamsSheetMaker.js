@@ -29,37 +29,14 @@ function timeAddMinutes(time, min) {
          +(m+"").padStart(2,"0")       // original seconds unchanged
 } 
 
-function TeamsSheetMaker() {
+function TeamsSheetMaker({ group, staff, monday }) {
     const shiftsGridRef = useRef();
     const containerStyle = useMemo(() => ({ width: '100%', height: '100%' }), []);
     const gridStyle = useMemo(() => ({ height: '100%', width: '100%' }), []);
     const [shiftsRowData, setShiftsRowData] = useState([])
-    const [staff, setStaff] = useState([])
-    const [monday, setMonday] = useState([])
-    const [group, setGroup] = useState([])
 
     useEffect(() => {
       // Perform localStorage action
-
-      let feedtemp = localStorage.getItem('FeedData')
-      if (feedtemp != null){
-        
-        let tempArray = []
-        for (let i = 1; i < feedtemp.split("}")[2].split("{")[0].split("[").length; i++) {
-          tempArray[i] = feedtemp.split("}")[2].split("{")[0].split("[")[i].split("]")[0]
-        }
-        tempArray.splice(0,1)
-        setGroup(tempArray)
-    
-        tempArray = []
-        for (let i = 1; i < feedtemp.split("}")[1].split("{")[0].split("[").length; i++) {
-          tempArray[i] = feedtemp.split("}")[1].split("{")[0].split("[")[i].split("]")[0].split("|")
-        }
-        tempArray.splice(0,1)
-        setStaff(tempArray)
-      }
-      
-      setMonday(dayjs(JSON.parse(localStorage.getItem('monday'))))
     }, [])   
 
 
