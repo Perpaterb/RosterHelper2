@@ -40,9 +40,26 @@ function TeamsSheetMaker() {
 
     useEffect(() => {
       // Perform localStorage action
-      setStaff(JSON.parse(localStorage.getItem('staff')))
+
+      let feedtemp = localStorage.getItem('FeedData')
+      if (feedtemp != null){
+        
+        let tempArray = []
+        for (let i = 1; i < feedtemp.split("}")[2].split("{")[0].split("[").length; i++) {
+          tempArray[i] = feedtemp.split("}")[2].split("{")[0].split("[")[i].split("]")[0]
+        }
+        tempArray.splice(0,1)
+        setGroup(tempArray)
+    
+        tempArray = []
+        for (let i = 1; i < feedtemp.split("}")[1].split("{")[0].split("[").length; i++) {
+          tempArray[i] = feedtemp.split("}")[1].split("{")[0].split("[")[i].split("]")[0].split("|")
+        }
+        tempArray.splice(0,1)
+        setStaff(tempArray)
+      }
+      
       setMonday(dayjs(JSON.parse(localStorage.getItem('monday'))))
-      setGroup(JSON.parse(localStorage.getItem('group')))
     }, [])   
 
 
