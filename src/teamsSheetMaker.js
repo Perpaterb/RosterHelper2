@@ -73,7 +73,7 @@ function TeamsSheetMaker({ group, staff, monday }) {
     
     const updateData = async event => {
 
-      const daysInWeek = ["Monday", "Tusday", "Wednessday", "Thurday", "Friday", "Saturday", "Sunday"]
+      const daysInWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
       let teamsData = []
   
       for (let st = 0; st < staff.length; st++) {

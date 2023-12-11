@@ -99,7 +99,7 @@ function RosterHelper() {
 
   function updateHumanityDataForExport(humanityCSV) {
 
-    const daysInWeek = ["Monday", "Tusday", "Wednessday", "Thurday", "Friday", "Saturday", "Sunday"]
+    const daysInWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     let humExport = humanityCSV
     let dataFromStorage = []
 
@@ -107,7 +107,7 @@ function RosterHelper() {
       for (let i = 0; i < 7; i++) {
         let check = localStorage.getItem(monday.add(i, 'day').format('DD-MM-YYYY') + daysInWeek[i] + staff[st])
         if(check != null){
-          dataFromStorage.push({date: monday.add(i, 'day').format('DD-MM-YYYY'), dayName: daysInWeek[i], staffName: staff[st], shiftData: JSON.parse(check).value})
+          dataFromStorage.push({date: monday.add(i, 'day').format('MM/DD/YYYY'), dayName: daysInWeek[i], staffName: staff[st], shiftData: JSON.parse(check).value})
         }
       }
     }
@@ -116,41 +116,43 @@ function RosterHelper() {
     // humanityCsv#######
     let humenityArray =[]
     for(let i = 0; i < dataFromStorage.length; i++) {
-      
-      if (dataFromStorage[i].shiftData[3] === '0000'){ //creating one shif
-        humenityArray = createShiftInHumanity(
-          dataFromStorage[i].date,
-          dataFromStorage[i].staffName,
-          dataFromStorage[i].shiftData,
-          getTimeAsNeededForHumanity(dataFromStorage[i].shiftData[2].slice(0, 2) + ":" + dataFromStorage[i].shiftData[2].slice(2)),
-          getTimeAsNeededForHumanity(timeAddMinutes((dataFromStorage[i].shiftData[2].slice(0, 2) + ":" + dataFromStorage[i].shiftData[2].slice(2)), (8*60)))
-        ) // (monday,staff,Shift.value,index,startTime(0000), endTime(0000))
-        
 
-        humExport.push(humenityArray) // add to overall array
+      // console.log("dataFromStorage[i].shiftData[0]", dataFromStorage[i].shiftData[0])
+      if (dataFromStorage[i].shiftData[0] != 'none'){        
+        if (dataFromStorage[i].shiftData[3] === '0000'){ //creating one shif
+          humenityArray = createShiftInHumanity(
+            dataFromStorage[i].date,
+            dataFromStorage[i].staffName,
+            dataFromStorage[i].shiftData,
+            getTimeAsNeededForHumanity(dataFromStorage[i].shiftData[2].slice(0, 2) + ":" + dataFromStorage[i].shiftData[2].slice(2)),
+            getTimeAsNeededForHumanity(timeAddMinutes((dataFromStorage[i].shiftData[2].slice(0, 2) + ":" + dataFromStorage[i].shiftData[2].slice(2)), (8*60)))
+          ) // (monday,staff,Shift.value,index,startTime(0000), endTime(0000))
+          
 
-      } else {  // creating 2 shifts 
+          humExport.push(humenityArray) // add to overall array
 
-        humenityArray = createShiftInHumanity(
-          dataFromStorage[i].date,
-          dataFromStorage[i].staffName,
-          dataFromStorage[i].shiftData,
-          getTimeAsNeededForHumanity(dataFromStorage[i].shiftData[2].slice(0, 2) + ":" + dataFromStorage[i].shiftData[2].slice(2)),
-          getTimeAsNeededForHumanity(dataFromStorage[i].shiftData[3].slice(0, 2) + ":" + dataFromStorage[i].shiftData[3].slice(2))
-        )
+        } else {  // creating 2 shifts 
 
-        humExport.push(humenityArray) // add to overall array
+          humenityArray = createShiftInHumanity(
+            dataFromStorage[i].date,
+            dataFromStorage[i].staffName,
+            dataFromStorage[i].shiftData,
+            getTimeAsNeededForHumanity(dataFromStorage[i].shiftData[2].slice(0, 2) + ":" + dataFromStorage[i].shiftData[2].slice(2)),
+            getTimeAsNeededForHumanity(dataFromStorage[i].shiftData[3].slice(0, 2) + ":" + dataFromStorage[i].shiftData[3].slice(2))
+          )
 
-        humenityArray = createShiftInHumanity(
-          dataFromStorage[i].date,
-          dataFromStorage[i].staffName,
-          dataFromStorage[i].shiftData,
-          getTimeAsNeededForHumanity(timeAddMinutes((dataFromStorage[i].shiftData[3].slice(0, 2) + ":" + dataFromStorage[i].shiftData[3].slice(2)), (60))),
-          getTimeAsNeededForHumanity(timeAddMinutes((dataFromStorage[i].shiftData[2].slice(0, 2) + ":" + dataFromStorage[i].shiftData[2].slice(2)), (8*60)))
-        )
-        humExport.push(humenityArray) // add to overall array
+          humExport.push(humenityArray) // add to overall array
+
+          humenityArray = createShiftInHumanity(
+            dataFromStorage[i].date,
+            dataFromStorage[i].staffName,
+            dataFromStorage[i].shiftData,
+            getTimeAsNeededForHumanity(timeAddMinutes((dataFromStorage[i].shiftData[3].slice(0, 2) + ":" + dataFromStorage[i].shiftData[3].slice(2)), (60))),
+            getTimeAsNeededForHumanity(timeAddMinutes((dataFromStorage[i].shiftData[2].slice(0, 2) + ":" + dataFromStorage[i].shiftData[2].slice(2)), (8*60)))
+          )
+          humExport.push(humenityArray) // add to overall array
+        }
       }
-
     }
     setHumanityData(humExport)
   }

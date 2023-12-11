@@ -22,7 +22,7 @@ function PersonsWeek({index, staff, shifts, monday, group}) {
 //   const setShift = () => {
 //   }
 
-  let day = ["Monday", "Tusday", "Wednessday", "Thurday", "Friday", "Saturday", "Sunday"]
+  let day = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 
 
