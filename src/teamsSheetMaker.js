@@ -4,8 +4,10 @@ import React, {
     useRef,
     useState,
     StrictMode,
+    useEffect
   } from 'react';
-import moment from 'moment'
+import moment from 'moment';
+import dayjs from 'dayjs';
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-enterprise';
 import 'ag-grid-community/styles/ag-grid.css';
@@ -15,11 +17,28 @@ const delay = ms => new Promise(
   resolve => setTimeout(resolve, ms)
 );
 
-function TeamsSheetMaker() {
+function timeAddMinutes(time, min) {
+  var t = time.split(":"),      // convert to array [hh, mm, ss]
+      h = Number(t[0]),         // get hours
+      m = Number(t[1]);         // get minutes
+  m+= min % 60;                 // increment minutes
+  h+= Math.floor(min/60);       // increment hours
+  if (m >= 60) { h++; m-=60 }   // if resulting minues > 60 then increment hours and balance as minutes
+  
+  return (h+"").padStart(2,"0")  +":"  //create string padded with zeros for HH and MM
+         +(m+"").padStart(2,"0")       // original seconds unchanged
+} 
+
+function TeamsSheetMaker({ group, staff, monday }) {
     const shiftsGridRef = useRef();
     const containerStyle = useMemo(() => ({ width: '100%', height: '100%' }), []);
     const gridStyle = useMemo(() => ({ height: '100%', width: '100%' }), []);
     const [shiftsRowData, setShiftsRowData] = useState([])
+
+    useEffect(() => {
+      // Perform localStorage action
+    }, [])   
+
 
     // const [shiftsRowData, setRowData] = useState([
     //   {
@@ -54,24 +73,38 @@ function TeamsSheetMaker() {
     
     const updateData = async event => {
 
-      const teamsData = JSON.parse(localStorage.getItem('teamsCSV'))
-        let tempData = []
-        for (let i = 1; i < teamsData.length; i++) {
-          tempData.push({
-            fullName: teamsData[i][0],
-            email: teamsData[i][1],
-            group: teamsData[i][2],
-            startDate: teamsData[i][3],
-            startTime: teamsData[i][4],
-            endDate: teamsData[i][5],
-            endTime: teamsData[i][6],
-            themeColor: teamsData[i][7],
-            customLabel: teamsData[i][8],
-            unpaidBreak: teamsData[i][9],
-            notes: teamsData[i][10],
-            shared: teamsData[i][11],
-          })
+      const daysInWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+      let teamsData = []
+  
+      for (let st = 0; st < staff.length; st++) {
+        for (let i = 0; i < 7; i++) {
+          let check = localStorage.getItem(monday.add(i, 'day').format('DD-MM-YYYY') + daysInWeek[i] + staff[st])
+          if(check != null){
+            teamsData.push({date: monday.add(i, 'day').format('MM/DD/YYYY'), dayName: daysInWeek[i], staffName: staff[st], shiftData: JSON.parse(check).value})
+          }
         }
+      }
+
+      //console.log("group", group)
+
+      let tempData = []
+      for (let i = 0; i < teamsData.length; i++) {
+        if(teamsData[i].shiftData[0] != 'none'){
+        tempData.push({
+          fullName: teamsData[i].staffName[0],
+          email: teamsData[i].staffName[1],
+          group: group,
+          startDate: teamsData[i].date,
+          startTime: teamsData[i].shiftData[2].slice(0, 2) + ":" + teamsData[i].shiftData[2].slice(2),
+          endDate: teamsData[i].date,
+          endTime: timeAddMinutes((teamsData[i].shiftData[2].slice(0, 2) + ":" + teamsData[i].shiftData[2].slice(2)), (8*60)),
+          themeColor: teamsData[i].shiftData[1],
+          customLabel: teamsData[i].shiftData[0],
+          unpaidBreak: '',
+          notes: teamsData[i].shiftData[4],
+          shared: '2. Not Shared',
+        })}
+      }
         setShiftsRowData(tempData)
         await delay(1000);
         exportFile()

@@ -16,39 +16,70 @@ import feeddataITSCExample from './feeddataITSCExample.csv';
 import getMultipleSheetsAsExcel from 'ag-grid-react';
 import TeamsSheetMaker from './teamsSheetMaker'
 
+
+function createShiftInHumanity(date,staff,shiftData,shiftStartTime,shiftEndTime) {
+
+  let tempArray = []
+
+  tempArray = [staff[0]]
+  tempArray.push(shiftData[5])
+  tempArray.push(staff[2])
+  tempArray.push(date)
+  tempArray.push(date)
+  tempArray.push(shiftStartTime)
+  tempArray.push(shiftEndTime)
+  tempArray.push(shiftData[0] + " Lunch from " + getTimeAsNeededForHumanity(shiftData[3]))
+  tempArray.push('')
+  tempArray.push('')
+  tempArray.push('')
+  return (tempArray)
+}
+
+function getTimeAsNeededForHumanity(time) {
+  time = time.replace(":", "")
+  let ending = 'am'
+  if (time > 1159) {
+    ending = 'pm'
+    if (time > 1259) {
+      let hrs = (parseInt(time.slice(0, 2))-12).toString()
+      if (hrs.length === 1){
+        hrs = '0' + hrs
+      }
+      time = hrs + ":" + time.slice(2) + ending
+    } else {
+    time = time.slice(0, 2) + ":" + time.slice(2) + ending
+    } 
+  } else {
+    time = time.slice(0, 2) + ":" + time.slice(2) + ending
+  }
+  return time
+}
+
+function timeAddMinutes(time, min) {
+  var t = time.split(":"),      // convert to array [hh, mm, ss]
+      h = Number(t[0]),         // get hours
+      m = Number(t[1]);         // get minutes
+  m+= min % 60;                 // increment minutes
+  h+= Math.floor(min/60);       // increment hours
+  if (m >= 60) { h++; m-=60 }   // if resulting minues > 60 then increment hours and balance as minutes
+  
+  return (h+"").padStart(2,"0")  +":"  //create string padded with zeros for HH and MM
+         +(m+"").padStart(2,"0")       // original seconds unchanged
+} 
+
+
+
 function RosterHelper() {
-  let teamsCSV = [
-    ["Member","Work Email","Group","Shift Start Date","Shift Start Time","Shift End Date","Shift End Time","Theme Color","Custom Label","Unpaid Break (minutes)","Notes","Shared"]
-  ]
-
-  let humanityCSV = [
-    ["Names","Location","Position","Start Date","End Date","Start Time","End Time","Notes","Title","Open","Remote sites"]
-  ]
-
+  const teamsCSV = [["Member","Work Email","Group","Shift Start Date","Shift Start Time","Shift End Date","Shift End Time","Theme Color","Custom Label","Unpaid Break (minutes)","Notes","Shared"]]
+  const humanityCSV = [["Names","Location","Position","Start Date","End Date","Start Time","End Time","Notes","Title","Open","Remote sites"]]
   let defaultFeed = "{Staff}\n{Group name in teams}\n{Shifts}"
   const [feedData, setFeedData] = useState('');
   const [staff, setStaff] = useState([]);
   const [shifts, setShifts] = useState([]);
   const [group, setGroup] = useState([]);
   const [monday, setMonday] = useState(dayjs().day(1));
-  const [teamsData, setTeamsData] = useState(teamsCSV);
-  
-
-  const [humanityData, setHumanityData] = useState(teamsCSV);
-  
-
+  const [humanityData, setHumanityData] = useState(humanityCSV);
   const [errorInFeed, setErroInFeed] = useState(false);
-
-  // try {
-  //   localStorage.setItem('humanityCSV', JSON.stringify(humanityCSV))
-  // } catch (error) {
-  //   console.error(error.message); //raises the error
-  // }
-  // try {
-  //   localStorage.setItem('teamsCSV', JSON.stringify(teamsCSV))
-  // } catch (error) {
-  //   console.error(error.message); //raises the error
-  // }
 
   useEffect(() => { 
     if (localStorage.getItem('FeedData') === undefined || localStorage.getItem('FeedData') === null || localStorage.getItem('FeedData') === 'undefined') {
@@ -61,20 +92,68 @@ function RosterHelper() {
     } 
   },[]);
 
+  function updateMonady(data) {
+  setMonday(data)
+  localStorage.setItem('monday', JSON.stringify(data))
+  }
 
-  function updateHumanityDataForExport(humData) {
-    
+  function updateHumanityDataForExport(humanityCSV) {
 
+    const daysInWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     let humExport = humanityCSV
-    for (let i = 1; i < humData.length; i++) {
-      //console.log("humData[i][3]", humData[i][3])
-      //console.log("monday", monday.format('DD-MM-YYYY'))
-      if(humData[i][3] === monday.format('DD-MM-YYYY') || humData[i][3] === monday.add(1, 'day').format('DD-MM-YYYY') || humData[i][3] === monday.add(2, 'day').format('DD-MM-YYYY') || humData[i][3] === monday.add(3, 'day').format('DD-MM-YYYY') || humData[i][3] === monday.add(4, 'day').format('DD-MM-YYYY') || humData[i][3] === monday.add(5, 'day').format('DD-MM-YYYY') || humData[i][3] === monday.add(6, 'day').format('DD-MM-YYYY')){
-        humExport.push(humData[i])
+    let dataFromStorage = []
+
+    for (let st = 0; st < staff.length; st++) {
+      for (let i = 0; i < 7; i++) {
+        let check = localStorage.getItem(monday.add(i, 'day').format('DD-MM-YYYY') + daysInWeek[i] + staff[st])
+        if(check != null){
+          dataFromStorage.push({date: monday.add(i, 'day').format('MM/DD/YYYY'), dayName: daysInWeek[i], staffName: staff[st], shiftData: JSON.parse(check).value})
+        }
       }
-
     }
+    
+   
+    // humanityCsv#######
+    let humenityArray =[]
+    for(let i = 0; i < dataFromStorage.length; i++) {
 
+      // console.log("dataFromStorage[i].shiftData[0]", dataFromStorage[i].shiftData[0])
+      if (dataFromStorage[i].shiftData[0] != 'none'){        
+        if (dataFromStorage[i].shiftData[3] === '0000'){ //creating one shif
+          humenityArray = createShiftInHumanity(
+            dataFromStorage[i].date,
+            dataFromStorage[i].staffName,
+            dataFromStorage[i].shiftData,
+            getTimeAsNeededForHumanity(dataFromStorage[i].shiftData[2].slice(0, 2) + ":" + dataFromStorage[i].shiftData[2].slice(2)),
+            getTimeAsNeededForHumanity(timeAddMinutes((dataFromStorage[i].shiftData[2].slice(0, 2) + ":" + dataFromStorage[i].shiftData[2].slice(2)), (8*60)))
+          ) // (monday,staff,Shift.value,index,startTime(0000), endTime(0000))
+          
+
+          humExport.push(humenityArray) // add to overall array
+
+        } else {  // creating 2 shifts 
+
+          humenityArray = createShiftInHumanity(
+            dataFromStorage[i].date,
+            dataFromStorage[i].staffName,
+            dataFromStorage[i].shiftData,
+            getTimeAsNeededForHumanity(dataFromStorage[i].shiftData[2].slice(0, 2) + ":" + dataFromStorage[i].shiftData[2].slice(2)),
+            getTimeAsNeededForHumanity(dataFromStorage[i].shiftData[3].slice(0, 2) + ":" + dataFromStorage[i].shiftData[3].slice(2))
+          )
+
+          humExport.push(humenityArray) // add to overall array
+
+          humenityArray = createShiftInHumanity(
+            dataFromStorage[i].date,
+            dataFromStorage[i].staffName,
+            dataFromStorage[i].shiftData,
+            getTimeAsNeededForHumanity(timeAddMinutes((dataFromStorage[i].shiftData[3].slice(0, 2) + ":" + dataFromStorage[i].shiftData[3].slice(2)), (60))),
+            getTimeAsNeededForHumanity(timeAddMinutes((dataFromStorage[i].shiftData[2].slice(0, 2) + ":" + dataFromStorage[i].shiftData[2].slice(2)), (8*60)))
+          )
+          humExport.push(humenityArray) // add to overall array
+        }
+      }
+    }
     setHumanityData(humExport)
   }
 
@@ -99,6 +178,7 @@ function RosterHelper() {
       }
       tempArray.splice(0,1)
       setStaff(tempArray)
+      localStorage.setItem('staff', JSON.stringify(tempArray))
       //console.log("Staff", tempArray)
     
       tempArray = []
@@ -108,6 +188,7 @@ function RosterHelper() {
       tempArray.splice(0,1)
       // console.log("Group", tempArray)
       setGroup(tempArray)
+      localStorage.setItem('group', JSON.stringify(tempArray))
       
     
       tempArray = []
@@ -124,15 +205,8 @@ function RosterHelper() {
       setShifts(tempArray)
     }
 
-
-
   }
-  
 
-
-  // useEffect(() => { 
-  //   staffnames = feedData.split(",")[0]
-  // },[feedData]);
 
   let teamsDownloadName = "MS teams Roster export " + moment().format('MMMM Do YYYY, h:mm:ss a') + ".csv" ;
   let humanityDownloadName = "Humanity Roster export " + moment().format('MMMM Do YYYY, h:mm:ss a') + ".csv" ;
@@ -203,7 +277,7 @@ function RosterHelper() {
               <Box>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <p>Monday of the roster week :</p>
-                          <DatePicker defaultValue={dayjs().day(1)} format="DD-MM-YYYY" onChange={(newValue) => setMonday(newValue)} shouldDisableDate={isNotMonday}
+                          <DatePicker defaultValue={dayjs().day(1)} format="DD-MM-YYYY" onChange={(newValue) => updateMonady(newValue)} shouldDisableDate={isNotMonday}
                             sx={{
                               width: 400,
                             }}
@@ -222,14 +296,18 @@ function RosterHelper() {
                 ))}
                       
                 <CSVLink data={humanityData} asyncOnClick={true} filename={humanityDownloadName}
-                  onClick={(event, done) => {updateHumanityDataForExport(JSON.parse(localStorage.getItem('humanityCSV'))); done(); }}  
+                  onClick={(event, done) => {updateHumanityDataForExport(humanityCSV); done(); }}  
                 > Export Humanity Roster </CSVLink>
                 <Box
                     sx={{
                       height: 30,
                     }}
                   ></Box>
-                  <TeamsSheetMaker></TeamsSheetMaker>
+                  <TeamsSheetMaker 
+                    group={group}
+                    staff={staff}
+                    monday={monday}
+                  ></TeamsSheetMaker>
               </Box>
             )
           }
